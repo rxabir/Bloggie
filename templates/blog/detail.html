@@ -60,8 +60,7 @@
                     <button class="favorite-btn" onclick="toggleFavorite('{{ blog.slug }}')" id="favorite-btn"
                         data-favorited="{{ is_favorited|yesno:'true,false' }}">
                         <i class="{% if is_favorited %}fas{% else %}far{% endif %} fa-heart"></i>
-                        <span id="favorite-text">{% if is_favorited %}Favorited{% else %}Add to Favorites{% endif
-                            %}</span>
+                        <span id="favorite-text">{% if is_favorited %}Favorited{% else %}Add to Favorites{% endif %}</span>
                     </button>
                     {% endif %}
                 </div>
@@ -150,7 +149,6 @@
 </div>
 {% endblock %}
 
-
 {% block extra_js %}
 <script>
     function getCookie(name) {
@@ -168,6 +166,7 @@
         return cookieValue;
     }
     const csrftoken = getCookie('csrftoken');
+
     function toggleFavorite(slug) {
         fetch(`/blog/${slug}/favorite/`, {
             method: 'POST',
@@ -194,64 +193,66 @@
             });
     }
 
-
     document.addEventListener('DOMContentLoaded', function () {
         const ratingStars = document.querySelectorAll('.rating-star');
-        const blogSlug = document.querySelector('.rating-stars-input').dataset.blogSlug;
+        const ratingContainer = document.querySelector('.rating-stars-input');
+        if (!ratingContainer) return;
 
-    
+        const blogSlug = ratingContainer.dataset.blogSlug;
+        let userRating = 0;
+
         {% if user_rating %}
-        const userRating = {{ user_rating.score }
-    };
-    ratingStars.forEach((star, index) => {
-        if (index < userRating) {
-            star.className = 'fas fa-star rating-star';
-        }
-    });
-    {% endif %}
+        userRating = {{ user_rating.score }};
+        {% endif %}
 
-    ratingStars.forEach((star, index) => {
-        star.addEventListener('click', function () {
-            const rating = index + 1;
+        // Pre-fill user rating stars
+        ratingStars.forEach((star, index) => {
+            if (index < userRating) {
+                star.className = 'fas fa-star rating-star';
+            }
+        });
 
-            fetch(`/blog/${blogSlug}/rate/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `score=${rating}`
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                
-                        ratingStars.forEach((s, i) => {
-                            if (i < rating) {
-                                s.className = 'fas fa-star rating-star';
-                            } else {
-                                s.className = 'far fa-star rating-star';
-                            }
-                        });
+        // Add event listeners
+        ratingStars.forEach((star, index) => {
+            star.addEventListener('click', function () {
+                const rating = index + 1;
+
+                fetch(`/blog/${blogSlug}/rate/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `score=${rating}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            ratingStars.forEach((s, i) => {
+                                if (i < rating) {
+                                    s.className = 'fas fa-star rating-star';
+                                } else {
+                                    s.className = 'far fa-star rating-star';
+                                }
+                            });
+                        }
+                    });
+            });
+
+            star.addEventListener('mouseenter', function () {
+                ratingStars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.style.color = '';
                     }
                 });
-        });
-
-  
-        star.addEventListener('mouseenter', function () {
-            ratingStars.forEach((s, i) => {
-                if (i <= index) {
-                    s.style.color = '#ffc107';
-                } else {
-                    s.style.color = '';
-                }
             });
         });
-    });
 
-    document.querySelector('.rating-stars-input').addEventListener('mouseleave', function () {
-        ratingStars.forEach(s => s.style.color = '');
+        document.querySelector('.rating-stars-input').addEventListener('mouseleave', function () {
+            ratingStars.forEach(s => s.style.color = '');
+        });
     });
-});
 </script>
 {% endblock %}
