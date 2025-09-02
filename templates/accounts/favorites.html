@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}My Favorites - Blog Site{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-heart me-2 text-danger"></i>My Favorite Blogs</h2>
+</div>
+
+{% if favorites %}
+    <div class="row">
+        {% for favorite in favorites %}
+            <div class="col-md-6 mb-4">
+                <div class="card blog-card h-100">
+                    {% if favorite.blog.featured_image %}
+                        <img src="{{ favorite.blog.featured_image.url }}" class="card-img-top" alt="{{ favorite.blog.title }}" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ favorite.blog.title }}</h5>
+                        <p class="card-text">{{ favorite.blog.body|truncatewords:20 }}</p>
+                        
+                        <div class="blog-meta mb-2">
+                            <small>
+                                <i class="fas fa-user me-1"></i>{{ favorite.blog.author.get_full_name }}
+                                <i class="fas fa-calendar ms-3 me-1"></i>{{ favorite.blog.created_at|date:"M d, Y" }}
+                                {% if favorite.blog.category %}
+                                    <i class="fas fa-tag ms-3 me-1"></i>{{ favorite.blog.category.name }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{{ favorite.blog.get_absolute_url }}" class="btn btn-primary">Read More</a>
+                            <small class="text-muted ms-2">
+                                <i class="fas fa-heart me-1"></i>Added {{ favorite.created_at|date:"M d, Y" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-heart fa-4x text-muted mb-3"></i>
+        <h4>No favorites yet</h4>
+        <p class="text-muted">Start exploring blogs and add them to your favorites!</p>
+        <a href="{% url 'blog:home' %}" class="btn btn-primary">Browse Blogs</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Blog Site{% endblock %}
+
+{% block content %}
+
+<div class="search-form">
+    <form method="GET" class="row g-3">
+        <div class="col-md-4">
+            <input type="text" class="form-control" name="search" placeholder="Search blogs..." 
+                   value="{{ search_query }}">
+        </div>
+        <div class="col-md-2">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="author" class="form-select">
+                <option value="">All Authors</option>
+                {% for author in authors %}
+                    <option value="{{ author.id }}" {% if selected_author == author.id|stringformat:"s" %}selected{% endif %}>
+                        {{ author.get_full_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="sort" class="form-select">
+                <option value="">Latest</option>
+                <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Top Rated</option>
+                <option value="views" {% if sort_by == 'views' %}selected{% endif %}>Most Viewed</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search me-1"></i>Search
+            </button>
+        </div>
+    </form>
+</div>
+
+
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Latest Blogs</h2>
+    {% if user.is_authenticated and user.role != 'reader' %}
+        <a href="{% url 'blog:create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Write Blog
+        </a>
+    {% endif %}
+</div>
+
+{% if page_obj %}
+    <div class="row">
+        {% for blog in page_obj %}
+            <div class="col-md-4 mb-4">
+                <div class="card blog-card h-100">
+                    {% if blog.featured_image %}
+                        <img src="{{ blog.featured_image.url }}" class="card-img-top" alt="{{ blog.title }}" 
+                             style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ blog.title }}</h5>
+                        <p class="card-text">{{ blog.body|truncatewords:20 }}</p>
+                        
+                        <div class="blog-meta mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                <a href="{% url 'accounts:author_detail' blog.author.username %}" class="text-decoration-none">
+                                    {{ blog.author.get_full_name }}
+                                </a>
+                                <i class="fas fa-calendar ms-3 me-1"></i>{{ blog.created_at|date:"M d, Y" }}
+                                {% if blog.category %}
+                                    <i class="fas fa-tag ms-3 me-1"></i>{{ blog.category.name }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-eye me-1"></i>{{ blog.views }} views
+                            </small>
+                            {% if blog.get_rating_count > 0 %}
+                                <span class="rating-stars">
+                                    <i class="fas fa-star"></i> {{ blog.get_average_rating|floatformat:1 }}
+                                    <small class="text-muted">({{ blog.get_rating_count }})</small>
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{{ blog.get_absolute_url }}" class="btn btn-primary">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Blog pagination">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_author %}&author={{ selected_author }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_author %}&author={{ selected_author }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_author %}&author={{ selected_author }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+        <h4>No blogs found</h4>
+        <p class="text-muted">Try adjusting your search criteria or browse all blogs.</p>
+        <a href="{% url 'blog:home' %}" class="btn btn-primary">View All Blogs</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,164 @@
+:root {
+  --primary-color: #1d4ed8;       /* Deep blue */
+  --secondary-color: #6b7280;     /* Grayish */
+  --success-color: #16a34a;       /* Green */
+  --danger-color: #dc2626;        /* Red */
+  --warning-color: #f59e0b;       /* Amber */
+  --info-color: #0ea5e9;          /* Light blue */
+  --light-color: #f3f4f6;         /* Background light */
+  --dark-color: #111827;          /* Dark text */
+  --card-shadow: rgba(0, 0, 0, 0.08);
+}
+
+body {
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7;
+  background-color: var(--light-color);
+  color: var(--dark-color);
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--info-color);
+}
+
+/* Blog Cards */
+.blog-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px var(--card-shadow);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px var(--card-shadow);
+}
+
+.blog-meta {
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+}
+
+/* Rating Stars */
+.rating-stars {
+  color: #fbbf24; /* Gold */
+}
+
+/* Author Profile */
+.profile-img {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  transition: transform 0.3s ease;
+}
+
+.author-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 4px 12px var(--card-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.author-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px var(--card-shadow);
+}
+
+/* Favorite Button */
+.favorite-btn {
+  border: none;
+  background: none;
+  color: var(--danger-color);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.2);
+  opacity: 0.85;
+}
+
+/* Search Form */
+.search-form {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px var(--card-shadow);
+  margin-bottom: 2.5rem;
+}
+
+/* Blog Content */
+.blog-content {
+  line-height: 1.9;
+  font-size: 1rem;
+  color: var(--dark-color);
+}
+
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  transition: transform 0.3s ease;
+}
+
+.blog-content img:hover {
+  transform: scale(1.03);
+}
+
+/* Social Links */
+.social-links a {
+  color: var(--secondary-color);
+  font-size: 1.3rem;
+  margin-right: 1rem;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.social-links a:hover {
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* Footer */
+footer {
+  background: var(--dark-color);
+  color: #fff;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+footer h5 {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+footer p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-img {
+    width: 130px;
+    height: 130px;
+  }
+  .favorite-btn {
+    font-size: 1.2rem;
+  }
+}
+.container{
+    max-width: 1700px !important;
+}

@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ blog.title }} - Blog Site{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <article class="blog-content">
+            {% if blog.featured_image %}
+            <img src="{{ blog.featured_image.url }}" class="img-fluid rounded mb-4" alt="{{ blog.title }}">
+            {% endif %}
+
+            <h1 class="mb-3">{{ blog.title }}</h1>
+
+            <div class="blog-meta mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    {% if blog.author.profile_picture %}
+                    <img src="{{ blog.author.profile_picture.url }}" class="rounded-circle me-3" width="50" height="50"
+                        alt="{{ blog.author.get_full_name }}">
+                    {% else %}
+                    <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center"
+                        style="width: 50px; height: 50px;">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-0">
+                            <a href="{% url 'accounts:author_detail' blog.author.username %}"
+                                class="text-decoration-none">
+                                {{ blog.author.get_full_name }}
+                            </a>
+                        </h6>
+                        <small class="text-muted">{{ blog.created_at|date:"F d, Y" }}</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center text-muted">
+                    {% if blog.category %}
+                    <span class="badge bg-primary me-3">{{ blog.category.name }}</span>
+                    {% endif %}
+                    <small><i class="fas fa-eye me-1"></i>{{ blog.views }} views</small>
+                    {% if blog.get_rating_count > 0 %}
+                    <small class="ms-3">
+                        <span class="rating-stars">
+                            <i class="fas fa-star"></i> {{ blog.get_average_rating|floatformat:1 }}
+                        </span>
+                        ({{ blog.get_rating_count }} ratings)
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="blog-content">
+                {{ blog.body|linebreaks }}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-4 border-top">
+                <div>
+                    {% if user.is_authenticated %}
+                    <button class="favorite-btn" onclick="toggleFavorite('{{ blog.slug }}')" id="favorite-btn"
+                        data-favorited="{{ is_favorited|yesno:'true,false' }}">
+                        <i class="{% if is_favorited %}fas{% else %}far{% endif %} fa-heart"></i>
+                        <span id="favorite-text">{% if is_favorited %}Favorited{% else %}Add to Favorites{% endif
+                            %}</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div>
+                    {% if user == blog.author %}
+                    <a href="{% url 'blog:edit' blog.slug %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                    <a href="{% url 'blog:delete' blog.slug %}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-trash me-1"></i>Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="mt-4 pt-4 border-top">
+                <h5>Rate this blog</h5>
+                <div class="rating-section">
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Your rating:</span>
+                        <div class="rating-stars-input" data-blog-slug="{{ blog.slug }}">
+                            {% for i in "0123456"|make_list %}
+                            <i class="far fa-star rating-star" data-rating="{{ i }}"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="ms-3 text-muted">(0-6 scale)</span>
+                    </div>
+                    {% if user_rating %}
+                    <small class="text-muted">You rated this blog: {{ user_rating.score }}/6</small>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </article>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                {% if blog.author.profile_picture %}
+                <img src="{{ blog.author.profile_picture.url }}" class="rounded-circle mb-3" width="100" height="100"
+                    alt="{{ blog.author.get_full_name }}">
+                {% else %}
+                <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                    style="width: 100px; height: 100px;">
+                    <i class="fas fa-user fa-2x text-white"></i>
+                </div>
+                {% endif %}
+
+                <h5>{{ blog.author.get_full_name }}</h5>
+                <p class="text-muted">{{ blog.author.get_role_display }}</p>
+
+                {% if blog.author.bio %}
+                <p class="small">{{ blog.author.bio|truncatewords:20 }}</p>
+                {% endif %}
+
+                <a href="{% url 'accounts:author_detail' blog.author.username %}"
+                    class="btn btn-outline-primary btn-sm">
+                    View Profile
+                </a>
+            </div>
+        </div>
+
+        {% if related_blogs %}
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">More from {{ blog.author.get_full_name }}</h6>
+            </div>
+            <div class="card-body">
+                {% for related_blog in related_blogs %}
+                <div class="mb-3">
+                    <h6 class="mb-1">
+                        <a href="{{ related_blog.get_absolute_url }}" class="text-decoration-none">
+                            {{ related_blog.title }}
+                        </a>
+                    </h6>
+                    <small class="text-muted">{{ related_blog.created_at|date:"M d, Y" }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    function toggleFavorite(slug) {
+        fetch(`/blog/${slug}/favorite/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                const btn = document.getElementById('favorite-btn');
+                const icon = btn.querySelector('i');
+                const text = document.getElementById('favorite-text');
+
+                if (data.is_favorited) {
+                    icon.className = 'fas fa-heart';
+                    text.textContent = 'Favorited';
+                    btn.setAttribute('data-favorited', 'true');
+                } else {
+                    icon.className = 'far fa-heart';
+                    text.textContent = 'Add to Favorites';
+                    btn.setAttribute('data-favorited', 'false');
+                }
+            });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingStars = document.querySelectorAll('.rating-star');
+        const blogSlug = document.querySelector('.rating-stars-input').dataset.blogSlug;
+
+    
+        {% if user_rating %}
+        const userRating = {{ user_rating.score }
+    };
+    ratingStars.forEach((star, index) => {
+        if (index < userRating) {
+            star.className = 'fas fa-star rating-star';
+        }
+    });
+    {% endif %}
+
+    ratingStars.forEach((star, index) => {
+        star.addEventListener('click', function () {
+            const rating = index + 1;
+
+            fetch(`/blog/${blogSlug}/rate/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `score=${rating}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                
+                        ratingStars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.className = 'fas fa-star rating-star';
+                            } else {
+                                s.className = 'far fa-star rating-star';
+                            }
+                        });
+                    }
+                });
+        });
+
+  
+        star.addEventListener('mouseenter', function () {
+            ratingStars.forEach((s, i) => {
+                if (i <= index) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '';
+                }
+            });
+        });
+    });
+
+    document.querySelector('.rating-stars-input').addEventListener('mouseleave', function () {
+        ratingStars.forEach(s => s.style.color = '');
+    });
+});
+</script>
+{% endblock %}

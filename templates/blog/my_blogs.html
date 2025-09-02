@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}My Blogs - Blog Site{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-pen me-2"></i>My Blogs</h2>
+    <a href="{% url 'blog:create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Create New Blog
+    </a>
+</div>
+
+{% if page_obj %}
+    <div class="row">
+        {% for blog in page_obj %}
+            <div class="col-md-6 mb-4">
+                <div class="card blog-card">
+                    {% if blog.featured_image %}
+                        <img src="{{ blog.featured_image.url }}" class="card-img-top" alt="{{ blog.title }}" 
+                             style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">{{ blog.title }}</h5>
+                            <span class="badge {% if blog.status == 'published' %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ blog.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <p class="card-text">{{ blog.body|truncatewords:15 }}</p>
+                        
+                        <div class="blog-meta mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ blog.created_at|date:"M d, Y" }}
+                                {% if blog.category %}
+                                    <i class="fas fa-tag ms-3 me-1"></i>{{ blog.category.name }}
+                                {% endif %}
+                                <i class="fas fa-eye ms-3 me-1"></i>{{ blog.views }} views
+                                {% if blog.get_rating_count > 0 %}
+                                    <span class="rating-stars ms-3">
+                                        <i class="fas fa-star"></i> {{ blog.get_average_rating|floatformat:1 }}
+                                        ({{ blog.get_rating_count }})
+                                    </span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            {% if blog.status == 'published' %}
+                                <a href="{{ blog.get_absolute_url }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'blog:edit' blog.slug %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <a href="{% url 'blog:delete' blog.slug %}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Blog pagination">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-pen fa-4x text-muted mb-3"></i>
+        <h4>No blogs yet</h4>
+        <p class="text-muted">Start writing your first blog post!</p>
+        <a href="{% url 'blog:create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Create Your First Blog
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
