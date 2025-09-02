@@ -12,7 +12,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*', 'my-blog-site-avlp.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -60,7 +60,7 @@ WSGI_APPLICATION = 'blog_site.wsgi.application'
 
 # ✅ Database Configuration
 # Use PostgreSQL on Render, fallback to SQLite locally
-DATABASE_URL = config('DATABASE_URL', default=None)
+DATABASE_URL = config('postgresql://bloggie_sake_user:Z4JuK9DElkXPEJzw2iRtES3xDCiXZyqe@dpg-d2rh2aili9vc739mvdm0-a/bloggie_sake', default=None)
 
 if DATABASE_URL:
     DATABASES = {
