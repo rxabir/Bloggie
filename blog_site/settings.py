@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from decouple import config
 import dj_database_url
+import psycopg
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -109,7 +110,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
-    'https://my-blog-site-avlp.onrender.com',
+    'https://bloggie-jd1j.onrender.com',
 ]
 
 # ✅ Email Configuration
